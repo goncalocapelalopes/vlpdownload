@@ -10,4 +10,3 @@ header= {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:10.0) Gecko
 
 req = urllib.request.Request(url=ROOT_URL, headers=header)
 page = urllib.request.urlopen(req).read()
-print(page)
