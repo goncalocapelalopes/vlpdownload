@@ -7,7 +7,7 @@ ROOT_URL = "https://vaporwave.ivan.moe/list/"
 DESTINATION = "E:\Vaporwave Library"
 
 HEADERS = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:10.0) \
-          Gecko/20100101 Firefox/10.0"}
+            Gecko/20100101 Firefox/10.0"}
 
 
 def get_artists(root_url=ROOT_URL, http_headers=HEADERS):
