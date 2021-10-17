@@ -1,4 +1,6 @@
+import argparse
 import os
+from urllib.parse import quote, unquote
 import urllib.request
 
 from bs4 import BeautifulSoup
@@ -31,6 +33,7 @@ def get_album(artist_list, artist_name, album_name,
               root_url=ROOT_URL, http_headers=HEADERS,):
     if artist_name not in artist_list:
         raise Exception("Invalid artist name.")
+    artist_name = quote(artist_name)
     artist_url = root_url + artist_name + "/"
     artist_url = artist_url.replace(" ", "%20")
     req = urllib.request.Request(url=artist_url, headers=http_headers)
@@ -47,7 +50,7 @@ def get_album(artist_list, artist_name, album_name,
     
     if album_name not in album_list:
         raise Exception("Invalid album name.")
-    
+    album_name = quote(album_name)
     album_url = artist_url + album_name + "/"
     album_url = album_url.replace(" ", "%20")
     req = urllib.request.Request(url=album_url, headers=http_headers)
@@ -58,26 +61,35 @@ def get_album(artist_list, artist_name, album_name,
 
     # first element of the list is the parent directory "\.." link
     # child text alwas ends in "/" so .text[:-1] removes that char
-    song_list = [child.text for child in song_hrefs][1:]
+    song_list = [child["href"] for child in song_hrefs][1:]
+    artist_name = unquote(artist_name)
     artist_folder = os.path.join(DESTINATION, artist_name)
     if not os.path.exists(artist_folder):
         os.mkdir(artist_folder)
+    album_name = unquote(album_name)
     album_folder = os.path.join(artist_folder, album_name)
     if not os.path.exists(album_folder):
         os.mkdir(album_folder)
-    print("DOWNLOADING "+ artist_name)
+    print("DOWNLOADING "+ artist_name + " -> " + album_name)
     print("*"*20)
     for song_name in song_list:
+        # remove invalid filename characters
+        song_name = unquote(song_name)
         filename = os.path.join(album_folder, song_name)
         song_url = album_url + song_name
         song_url = song_url.replace(" ", "%20")
         print(song_name)
         
-        r = requests.get(album_url)
-        with open(filename, "wb+") as code:
-            code.write(r.content)
-    
+        r = requests.get(song_url)
+        with open(filename, "wb+") as f:
+            f.write(r.content)
 
 if __name__ == "__main__":
     artists = get_artists()
-    get_album(artists,"Vektroid", "Vektroid - Neo Cali (2011)")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--t", help="Artist name")
+    parser.add_argument("--a", help="Album name")
+    
+    args = parser.parse_args()
+    
+    get_album(artists, args.t, args.a)
